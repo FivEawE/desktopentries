@@ -10,30 +10,52 @@ pub struct Configuration {
         short = "a",
         long = "application",
         name = "Application",
-        conflicts_with_all = &["Not Application", "Link", "Folder"
-    ])]
+        conflicts_with_all = &["Not Application", "Link", "Directory", "URL"])]
     pub application: bool,
     #[structopt(
         short = "l",
         long = "link",
         name = "Link",
-        conflicts_with_all = &["Not Link", "Folder"]
+        conflicts_with_all = &["Not Link", "Directory", "TryExec", "Exec", "Path", "Terminal",
+            "Not Terminal", "Actions", "MimeType", "Categories", "Implements", "Keywords",
+            "StartupNotify", "Not StartupNotify", "StartupWMClass", "Not StartupWMClass",
+            "PrefersNonDefaultGPU", "Not PrefersNonDefaultGPU"
+        ]
     )]
     pub link: bool,
     #[structopt(
-        short = "f",
-        long = "folder",
-        name = "Folder",
-        conflicts_with = "Not Folder"
+        short = "d",
+        long = "directory",
+        name = "Directory",
+        conflicts_with_all = &["Not Directory", "URL", "TryExec", "Exec", "Path", "Terminal",
+            "Not Terminal", "Actions", "MimeType", "Categories", "Implements", "Keywords",
+            "StartupNotify", "Not StartupNotify", "StartupWMClass", "Not StartupWMClass",
+            "PrefersNonDefaultGPU", "Not PrefersNonDefaultGPU"
+        ]
     )]
-    pub folder: bool,
+    pub directory: bool,
 
-    #[structopt(short = "A", long = "not-application", name = "Not Application")]
+    #[structopt(
+        short = "A",
+        long = "not-application",
+        name = "Not Application",
+        conflicts_with_all = &[
+            "TryExec", "Exec", "Path", "Terminal", "Not Terminal", "Actions", "MimeType",
+            "Categories", "Implements", "Keywords", "StartupNotify", "Not StartupNotify",
+            "StartupWMClass", "Not StartupWMClass", "PrefersNonDefaultGPU",
+            "Not PrefersNonDefaultGPU"
+        ]
+    )]
     pub not_application: bool,
-    #[structopt(short = "L", long = "not-link", name = "Not Link")]
+    #[structopt(
+        short = "L",
+        long = "not-link",
+        name = "Not Link",
+        conflicts_with = "URL"
+    )]
     pub not_link: bool,
-    #[structopt(short = "F", long = "not-folder", name = "Not Folder")]
-    pub not_folder: bool,
+    #[structopt(short = "D", long = "not-directory", name = "Not Directory")]
+    pub not_directory: bool,
 
     #[structopt(short = "v", long = "version", name = "Version")]
     pub version: Option<String>,
@@ -86,14 +108,14 @@ pub struct Configuration {
     pub not_show_in: Option<Vec<String>>,
 
     #[structopt(
-        short = "d",
+        short = "b",
         long = "dbus-activatable",
         name = "DBusActivatable",
         conflicts_with = "Not DBusActivatable"
     )]
     pub dbus: bool,
     #[structopt(
-        short = "D",
+        short = "B",
         long = "not-dbus-activatable",
         name = "Not DBusActivatable",
         conflicts_with = "DBusActivatable"
@@ -156,7 +178,17 @@ pub struct Configuration {
     #[structopt(short = "w", long = "startup-wm-class", name = "StartupWMClass")]
     pub wm_class: Option<String>,
 
-    #[structopt(short = "u", long = "url", name = "URL")]
+    #[structopt(
+        short = "u",
+        long = "url",
+        name = "URL",
+        conflicts_with_all = &[
+            "TryExec", "Exec", "Path", "Terminal", "Not Terminal", "Actions", "MimeType",
+            "Categories", "Implements", "Keywords", "StartupNotify", "Not StartupNotify",
+            "StartupWMClass", "Not StartupWMClass", "PrefersNonDefaultGPU",
+            "Not PrefersNonDefaultGPU"
+        ]
+    )]
     pub url: Option<String>,
 
     #[structopt(
