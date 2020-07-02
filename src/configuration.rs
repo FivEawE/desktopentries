@@ -16,10 +16,11 @@ pub struct Configuration {
         short = "l",
         long = "link",
         name = "Link",
-        conflicts_with_all = &["Not Link", "Directory", "TryExec", "Exec", "Path", "Terminal",
-            "Not Terminal", "Actions", "MimeType", "Categories", "Implements", "Keywords",
-            "StartupNotify", "Not StartupNotify", "StartupWMClass", "Not StartupWMClass",
-            "PrefersNonDefaultGPU", "Not PrefersNonDefaultGPU"
+        conflicts_with_all = &[
+            "Not Link", "Directory", "TryExec", "Exec", "Path", "Terminal", "Not Terminal",
+            "Actions", "MimeType", "Categories", "Implements", "Keywords", "StartupNotify",
+            "Not StartupNotify", "StartupWMClass", "Not StartupWMClass", "PrefersNonDefaultGPU",
+            "Not PrefersNonDefaultGPU"
         ]
     )]
     pub link: bool,
@@ -27,10 +28,11 @@ pub struct Configuration {
         short = "d",
         long = "directory",
         name = "Directory",
-        conflicts_with_all = &["Not Directory", "URL", "TryExec", "Exec", "Path", "Terminal",
-            "Not Terminal", "Actions", "MimeType", "Categories", "Implements", "Keywords",
-            "StartupNotify", "Not StartupNotify", "StartupWMClass", "Not StartupWMClass",
-            "PrefersNonDefaultGPU", "Not PrefersNonDefaultGPU"
+        conflicts_with_all = &[
+            "Not Directory", "URL", "TryExec", "Exec", "Path", "Terminal", "Not Terminal",
+            "Actions", "MimeType", "Categories", "Implements", "Keywords", "StartupNotify",
+            "Not StartupNotify", "StartupWMClass", "Not StartupWMClass", "PrefersNonDefaultGPU",
+            "Not PrefersNonDefaultGPU"
         ]
     )]
     pub directory: bool,
@@ -94,12 +96,7 @@ pub struct Configuration {
         conflicts_with = "Not Hidden"
     )]
     pub hidden: bool,
-    #[structopt(
-        short = "H",
-        long = "not-hidden",
-        name = "Not Hidden",
-        conflicts_with = "Hidden"
-    )]
+    #[structopt(short = "H", long = "not-hidden", name = "Not Hidden")]
     pub not_hidden: bool,
 
     #[structopt(short = "o", long = "only-show-in", name = "OnlyShowIn")]
@@ -117,8 +114,7 @@ pub struct Configuration {
     #[structopt(
         short = "B",
         long = "not-dbus-activatable",
-        name = "Not DBusActivatable",
-        conflicts_with = "DBusActivatable"
+        name = "Not DBusActivatable"
     )]
     pub not_dbus: bool,
 
@@ -137,12 +133,7 @@ pub struct Configuration {
         conflicts_with = "Not Terminal"
     )]
     pub terminal: bool,
-    #[structopt(
-        short = "T",
-        long = "not-terminal",
-        name = "Not Terminal",
-        conflicts_with = "Terminal"
-    )]
+    #[structopt(short = "T", long = "not-terminal", name = "Not Terminal")]
     pub not_terminal: bool,
 
     #[structopt(short = "e", long = "actions", name = "Actions")]
@@ -167,12 +158,7 @@ pub struct Configuration {
         conflicts_with = "Not StartupNotify"
     )]
     pub startup_notify: bool,
-    #[structopt(
-        short = "S",
-        long = "not-startup-notify",
-        name = "Not StartupNotify",
-        conflicts_with = "Terminal"
-    )]
+    #[structopt(short = "S", long = "not-startup-notify", name = "Not StartupNotify")]
     pub not_startup_notify: bool,
 
     #[structopt(short = "w", long = "startup-wm-class", name = "StartupWMClass")]
@@ -201,8 +187,7 @@ pub struct Configuration {
     #[structopt(
         short = "Z",
         long = "not-prefers-non-default-gpu",
-        name = "Not PrefersNonDefaultGPU",
-        conflicts_with = "Not PrefersNonDefaultGPU"
+        name = "Not PrefersNonDefaultGPU"
     )]
     pub not_non_default_gpu: bool,
 }
