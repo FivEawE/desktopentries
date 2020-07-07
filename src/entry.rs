@@ -10,7 +10,7 @@ pub struct Entry {
 }
 
 impl Entry {
-    pub fn new(file: File) -> Result<Entry, Box<dyn Error>> {
+    pub fn new(file: File) -> Result<Entry, ParseEntryError> {
         let reader = BufReader::new(file);
         let mut entries = HashMap::new();
 
@@ -27,10 +27,10 @@ impl Entry {
                 } else {
                     let split: Vec<&str> = line.splitn(2, '=').collect();
                     if split.len() < 2 {
-                        return Err(Box::new(ParseEntryError::new(format!(
+                        return Err(ParseEntryError::new(format!(
                             "Could not extract value from line {}: {}",
                             index, line
-                        ))));
+                        )));
                     }
                     let key = split[0].trim();
                     let value = split[1].trim();
@@ -67,7 +67,7 @@ impl Display for ParseEntryError {
 
 #[cfg(test)]
 mod test {
-    use crate::entry::{Entry, ParseEntryError};
+    use crate::entry::Entry;
     use std::error::Error;
     use std::io::{Seek, SeekFrom, Write};
     use tempfile;
@@ -130,8 +130,6 @@ I am just an invalid entry
 
         assert!(entry
             .err()
-            .unwrap()
-            .downcast::<ParseEntryError>()
             .unwrap()
             .message
             .contains("Could not extract value from line"));
