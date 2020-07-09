@@ -73,7 +73,7 @@ impl Checker {
             checks.push(Box::new(PrefersNonDefaultGPUCheck {}));
         }
         if conf.not_non_default_gpu {
-            checks.push(Box::new(PrefersNonDefaultGPUCheck {}));
+            checks.push(Box::new(NotPrefersNonDefaultGPUCheck {}));
         }
 
         Checker { checks }
@@ -282,4 +282,58 @@ impl Check for NotPrefersNonDefaultGPUCheck {
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::Checker;
+    use super::Configuration;
+    use super::Entry;
+    use std::collections::HashMap;
+    use structopt::StructOpt;
+
+    #[test]
+    fn test_trues() {
+        let mut entries = HashMap::new();
+        entries.insert(String::from("Type"), String::from("Application"));
+        entries.insert(String::from("NoDisplay"), String::from("true"));
+        entries.insert(String::from("Hidden"), String::from("true"));
+        entries.insert(String::from("DBusActivatable"), String::from("true"));
+        entries.insert(String::from("Terminal"), String::from("true"));
+        entries.insert(String::from("StartupNotify"), String::from("true"));
+        entries.insert(String::from("PrefersNonDefaultGPU"), String::from("true"));
+
+        let entry = Entry::from_entries(entries);
+        let conf = Configuration::from_iter(&["desktopentries", "-aLDyhbtsz"]);
+
+        let checker = Checker::new(conf);
+        assert!(checker.check_entry(&entry));
+    }
+
+    #[test]
+    fn test_falses() {
+        let mut entries = HashMap::new();
+        entries.insert(String::from("Type"), String::from("Application"));
+        entries.insert(String::from("NoDisplay"), String::from("false"));
+        entries.insert(String::from("Hidden"), String::from("false"));
+        entries.insert(String::from("DBusActivatable"), String::from("false"));
+        entries.insert(String::from("Terminal"), String::from("false"));
+        entries.insert(String::from("StartupNotify"), String::from("false"));
+        entries.insert(String::from("PrefersNonDefaultGPU"), String::from("false"));
+
+        let entry = Entry::from_entries(entries);
+        let conf = Configuration::from_iter(&["desktopentries", "-LDYHBTSZ"]);
+
+        let checker = Checker::new(conf);
+        assert!(checker.check_entry(&entry));
+    }
+
+    #[test]
+    fn test_empty_falses() {
+        let mut entries = HashMap::new();
+        entries.insert(String::from("Type"), String::from("Application"));
+
+        let entry = Entry::from_entries(entries);
+        let conf = Configuration::from_iter(&["desktopentries", "-LDYHBTSZ"]);
+
+        let checker = Checker::new(conf);
+        assert!(checker.check_entry(&entry));
+    }
+}

@@ -44,6 +44,11 @@ impl Entry {
     pub fn get_entries(&self) -> &HashMap<String, String> {
         &self.entries
     }
+
+    #[cfg(test)]
+    pub fn from_entries(entries: HashMap<String, String>) -> Entry {
+        Entry { entries }
+    }
 }
 
 #[derive(Debug)]
