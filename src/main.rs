@@ -1,7 +1,8 @@
 use structopt::StructOpt;
 
+mod checker;
 mod configuration;
-pub mod entry;
+mod entry;
 
 fn main() {
     let conf = configuration::Configuration::from_args();

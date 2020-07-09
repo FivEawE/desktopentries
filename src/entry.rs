@@ -67,7 +67,7 @@ impl Display for ParseEntryError {
 
 #[cfg(test)]
 mod test {
-    use crate::entry::Entry;
+    use super::*;
     use std::error::Error;
     use std::io::{Seek, SeekFrom, Write};
     use tempfile;
