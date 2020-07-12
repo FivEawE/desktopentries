@@ -1,3 +1,4 @@
+use regex::Regex;
 use std::collections::HashMap;
 
 use super::configuration::Configuration;
@@ -34,6 +35,14 @@ impl Checker {
             checks.push(Box::new(NotDirectoryCheck {}));
         }
 
+        if let Some(regex) = conf.version {
+            checks.push(Box::new(VersionCheck { regex }))
+        }
+
+        if let Some(regex) = conf.icon {
+            checks.push(Box::new(IconCheck { regex }))
+        }
+
         if conf.no_display {
             checks.push(Box::new(NoDisplayCheck {}));
         }
@@ -48,11 +57,30 @@ impl Checker {
             checks.push(Box::new(NotHiddenCheck {}));
         }
 
+        if let Some(regex_list) = conf.only_show_in {
+            checks.push(Box::new(OnlyShowInCheck { regex_list }))
+        }
+        if let Some(regex_list) = conf.not_show_in {
+            checks.push(Box::new(NotShowInCheck { regex_list }))
+        }
+
         if conf.dbus {
             checks.push(Box::new(DBusActivatableCheck {}));
         }
         if conf.not_dbus {
             checks.push(Box::new(NotDBusActivatableCheck {}));
+        }
+
+        if let Some(regex) = conf.try_exec {
+            checks.push(Box::new(TryExecCheck { regex }))
+        }
+
+        if let Some(regex) = conf.exec {
+            checks.push(Box::new(ExecCheck { regex }))
+        }
+
+        if let Some(regex) = conf.path {
+            checks.push(Box::new(PathCheck { regex }))
         }
 
         if conf.terminal {
@@ -62,11 +90,35 @@ impl Checker {
             checks.push(Box::new(NotTerminalCheck {}));
         }
 
+        if let Some(regex_list) = conf.actions {
+            checks.push(Box::new(ActionsCheck { regex_list }))
+        }
+
+        if let Some(regex_list) = conf.mime_type {
+            checks.push(Box::new(MimeTypeCheck { regex_list }))
+        }
+
+        if let Some(regex_list) = conf.categories {
+            checks.push(Box::new(CategoriesCheck { regex_list }))
+        }
+
+        if let Some(regex_list) = conf.implements {
+            checks.push(Box::new(ImplementsCheck { regex_list }))
+        }
+
         if conf.startup_notify {
             checks.push(Box::new(StartupNotifyCheck {}));
         }
         if conf.not_startup_notify {
             checks.push(Box::new(NotStartupNotifyCheck {}));
+        }
+
+        if let Some(regex) = conf.wm_class {
+            checks.push(Box::new(StartupWMClassCheck { regex }))
+        }
+
+        if let Some(regex) = conf.url {
+            checks.push(Box::new(URLCheck { regex }))
         }
 
         if conf.non_default_gpu {
@@ -155,6 +207,19 @@ impl Check for NotDirectoryCheck {
     }
 }
 
+struct VersionCheck {
+    regex: Regex,
+}
+impl Check for VersionCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("Version");
+        match entry {
+            Some(value) => self.regex.is_match(value),
+            None => false,
+        }
+    }
+}
+
 struct NoDisplayCheck {}
 impl Check for NoDisplayCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
@@ -176,6 +241,19 @@ impl Check for NotNoDisplayCheck {
     }
 }
 
+struct IconCheck {
+    regex: Regex,
+}
+impl Check for IconCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("Icon");
+        match entry {
+            Some(value) => self.regex.is_match(value),
+            None => false,
+        }
+    }
+}
+
 struct HiddenCheck {}
 impl Check for HiddenCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
@@ -192,6 +270,31 @@ impl Check for NotHiddenCheck {
         let entry = entries.get("Hidden");
         match entry {
             Some(value) => value == FALSE,
+            None => true,
+        }
+    }
+}
+
+struct OnlyShowInCheck {
+    regex_list: Vec<Regex>,
+}
+impl Check for OnlyShowInCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("OnlyShowIn");
+        match entry {
+            Some(value) => check_multi_string_entry(value, &self.regex_list),
+            None => true,
+        }
+    }
+}
+struct NotShowInCheck {
+    regex_list: Vec<Regex>,
+}
+impl Check for NotShowInCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("NotShowIn");
+        match entry {
+            Some(value) => check_multi_string_entry(value, &self.regex_list),
             None => true,
         }
     }
@@ -218,6 +321,45 @@ impl Check for NotDBusActivatableCheck {
     }
 }
 
+struct TryExecCheck {
+    regex: Regex,
+}
+impl Check for TryExecCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("TryExec");
+        match entry {
+            Some(value) => self.regex.is_match(value),
+            None => false,
+        }
+    }
+}
+
+struct ExecCheck {
+    regex: Regex,
+}
+impl Check for ExecCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("Exec");
+        match entry {
+            Some(value) => self.regex.is_match(value),
+            None => false,
+        }
+    }
+}
+
+struct PathCheck {
+    regex: Regex,
+}
+impl Check for PathCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("Path");
+        match entry {
+            Some(value) => self.regex.is_match(value),
+            None => false,
+        }
+    }
+}
+
 struct TerminalCheck {}
 impl Check for TerminalCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
@@ -234,6 +376,58 @@ impl Check for NotTerminalCheck {
         let entry = entries.get("Terminal");
         match entry {
             Some(value) => value == FALSE,
+            None => true,
+        }
+    }
+}
+
+struct ActionsCheck {
+    regex_list: Vec<Regex>,
+}
+impl Check for ActionsCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("Actions");
+        match entry {
+            Some(value) => check_multi_string_entry(value, &self.regex_list),
+            None => true,
+        }
+    }
+}
+
+struct MimeTypeCheck {
+    regex_list: Vec<Regex>,
+}
+impl Check for MimeTypeCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("MimeType");
+        match entry {
+            Some(value) => check_multi_string_entry(value, &self.regex_list),
+            None => true,
+        }
+    }
+}
+
+struct CategoriesCheck {
+    regex_list: Vec<Regex>,
+}
+impl Check for CategoriesCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("Categories");
+        match entry {
+            Some(value) => check_multi_string_entry(value, &self.regex_list),
+            None => true,
+        }
+    }
+}
+
+struct ImplementsCheck {
+    regex_list: Vec<Regex>,
+}
+impl Check for ImplementsCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("Implements");
+        match entry {
+            Some(value) => check_multi_string_entry(value, &self.regex_list),
             None => true,
         }
     }
@@ -260,6 +454,32 @@ impl Check for NotStartupNotifyCheck {
     }
 }
 
+struct StartupWMClassCheck {
+    regex: Regex,
+}
+impl Check for StartupWMClassCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("StartupWMClass");
+        match entry {
+            Some(value) => self.regex.is_match(value),
+            None => false,
+        }
+    }
+}
+
+struct URLCheck {
+    regex: Regex,
+}
+impl Check for URLCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        let entry = entries.get("URL");
+        match entry {
+            Some(value) => self.regex.is_match(value),
+            None => false,
+        }
+    }
+}
+
 struct PrefersNonDefaultGPUCheck {}
 impl Check for PrefersNonDefaultGPUCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
@@ -281,6 +501,26 @@ impl Check for NotPrefersNonDefaultGPUCheck {
     }
 }
 
+fn check_multi_string_entry(value: &String, regex_list: &Vec<Regex>) -> bool {
+    let regex_count = regex_list.len();
+    let mut count = 0;
+    let values: Vec<&str> = value.split(';').collect();
+
+    for regex in regex_list {
+        if count == regex_count {
+            return true;
+        }
+
+        for &string in &values {
+            if regex.is_match(string) {
+                count += 1;
+                break;
+            }
+        }
+    }
+    count == regex_count
+}
+
 #[cfg(test)]
 mod tests {
     use super::Checker;
@@ -288,6 +528,8 @@ mod tests {
     use super::Entry;
     use std::collections::HashMap;
     use structopt::StructOpt;
+
+    static APP_NAME: &str = "desktopentries";
 
     #[test]
     fn test_trues() {
@@ -301,7 +543,7 @@ mod tests {
         entries.insert(String::from("PrefersNonDefaultGPU"), String::from("true"));
 
         let entry = Entry::from_entries(entries);
-        let conf = Configuration::from_iter(&["desktopentries", "-aLDyhbtsz"]);
+        let conf = Configuration::from_iter(&[APP_NAME, "-aLDyhbtsz"]);
 
         let checker = Checker::new(conf);
         assert!(checker.check_entry(&entry));
@@ -319,7 +561,7 @@ mod tests {
         entries.insert(String::from("PrefersNonDefaultGPU"), String::from("false"));
 
         let entry = Entry::from_entries(entries);
-        let conf = Configuration::from_iter(&["desktopentries", "-LDYHBTSZ"]);
+        let conf = Configuration::from_iter(&[APP_NAME, "-LDYHBTSZ"]);
 
         let checker = Checker::new(conf);
         assert!(checker.check_entry(&entry));
@@ -331,7 +573,77 @@ mod tests {
         entries.insert(String::from("Type"), String::from("Application"));
 
         let entry = Entry::from_entries(entries);
-        let conf = Configuration::from_iter(&["desktopentries", "-LDYHBTSZ"]);
+        let conf = Configuration::from_iter(&[APP_NAME, "-LDYHBTSZ"]);
+
+        let checker = Checker::new(conf);
+        assert!(checker.check_entry(&entry));
+    }
+
+    #[test]
+    fn test_regex() {
+        let mut entries = HashMap::new();
+        entries.insert(String::from("Version"), String::from("1.0.1"));
+        entries.insert(String::from("Icon"), String::from("fOoBaR1"));
+        entries.insert(
+            String::from("OnlyShowIn"),
+            String::from("one;two;three;one;"),
+        );
+        entries.insert(String::from("NotShowIn"), String::from("four;five;six;"));
+        entries.insert(String::from("TryExec"), String::from("foo"));
+        entries.insert(String::from("Exec"), String::from("bar"));
+        entries.insert(String::from("Path"), String::from("/foo/bar/abc/def"));
+        entries.insert(
+            String::from("Actions"),
+            String::from("New Window;Hidden Window;"),
+        );
+        entries.insert(
+            String::from("MimeType"),
+            String::from("image/png;image/jpg;"),
+        );
+        entries.insert(String::from("Categories"), String::from("Audio;Video;"));
+        entries.insert(String::from("Implements"), String::from("something;"));
+        entries.insert(
+            String::from("Keywords"),
+            String::from("foo;bar;entry;desktop;"),
+        );
+        entries.insert(
+            String::from("StartupWMClass"),
+            String::from("Just a notification"),
+        );
+
+        let entry = Entry::from_entries(entries);
+        let conf = Configuration::from_iter(&[
+            APP_NAME,
+            "-v",
+            "1.0",
+            "-i",
+            "(?i)bar\\d",
+            "-o",
+            "three",
+            "one",
+            "-O",
+            "five",
+            "-X",
+            "o",
+            "-x",
+            "[^foo]",
+            "-p",
+            "/abc/",
+            "-e",
+            "Window",
+            "-m",
+            "(?i)image",
+            "-C",
+            "dio",
+            "deo",
+            "-I",
+            "thing",
+            "-k",
+            "desktop",
+            "entry",
+            "-w",
+            "(?i)NOTIFICATION",
+        ]);
 
         let checker = Checker::new(conf);
         assert!(checker.check_entry(&entry));

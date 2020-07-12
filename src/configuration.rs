@@ -1,3 +1,4 @@
+use regex::Regex;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -60,13 +61,13 @@ pub struct Configuration {
     pub not_directory: bool,
 
     #[structopt(short = "v", long = "version", name = "Version")]
-    pub version: Option<String>,
+    pub version: Option<Regex>,
 
     #[structopt(short = "n", long = "name", name = "Name")]
-    pub name: Option<String>,
+    pub name: Option<Regex>,
 
     #[structopt(short = "g", long = "generic-name", name = "GenericName")]
-    pub generic_name: Option<String>,
+    pub generic_name: Option<Regex>,
 
     #[structopt(
         short = "y",
@@ -84,10 +85,10 @@ pub struct Configuration {
     pub not_no_display: bool,
 
     #[structopt(short = "c", long = "comment", name = "Comment")]
-    pub comment: Option<String>,
+    pub comment: Option<Regex>,
 
     #[structopt(short = "i", long = "icon", name = "Icon")]
-    pub icon: Option<String>,
+    pub icon: Option<Regex>,
 
     #[structopt(
         short = "h",
@@ -100,9 +101,9 @@ pub struct Configuration {
     pub not_hidden: bool,
 
     #[structopt(short = "o", long = "only-show-in", name = "OnlyShowIn")]
-    pub only_show_in: Option<Vec<String>>,
+    pub only_show_in: Option<Vec<Regex>>,
     #[structopt(short = "O", long = "not-show-in", name = "NotShowIn")]
-    pub not_show_in: Option<Vec<String>>,
+    pub not_show_in: Option<Vec<Regex>>,
 
     #[structopt(
         short = "b",
@@ -119,12 +120,12 @@ pub struct Configuration {
     pub not_dbus: bool,
 
     #[structopt(short = "X", long = "try-exec", name = "TryExec")]
-    pub try_exec: Option<String>,
+    pub try_exec: Option<Regex>,
     #[structopt(short = "x", long = "exec", name = "Exec")]
-    pub exec: Option<String>,
+    pub exec: Option<Regex>,
 
     #[structopt(short = "p", long = "path", name = "Path")]
-    pub path: Option<String>,
+    pub path: Option<Regex>,
 
     #[structopt(
         short = "t",
@@ -137,19 +138,19 @@ pub struct Configuration {
     pub not_terminal: bool,
 
     #[structopt(short = "e", long = "actions", name = "Actions")]
-    pub actions: Option<Vec<String>>,
+    pub actions: Option<Vec<Regex>>,
 
     #[structopt(short = "m", long = "mime-type", name = "MimeType")]
-    pub mime_type: Option<Vec<String>>,
+    pub mime_type: Option<Vec<Regex>>,
 
     #[structopt(short = "C", long = "categories", name = "Categories")]
-    pub categories: Option<Vec<String>>,
+    pub categories: Option<Vec<Regex>>,
 
     #[structopt(short = "I", long = "implements", name = "Implements")]
-    pub implements: Option<Vec<String>>,
+    pub implements: Option<Vec<Regex>>,
 
     #[structopt(short = "k", long = "keywords", name = "Keywords")]
-    pub keywords: Option<Vec<String>>,
+    pub keywords: Option<Vec<Regex>>,
 
     #[structopt(
         short = "s",
@@ -162,7 +163,7 @@ pub struct Configuration {
     pub not_startup_notify: bool,
 
     #[structopt(short = "w", long = "startup-wm-class", name = "StartupWMClass")]
-    pub wm_class: Option<String>,
+    pub wm_class: Option<Regex>,
 
     #[structopt(
         short = "u",
@@ -175,7 +176,7 @@ pub struct Configuration {
             "Not PrefersNonDefaultGPU"
         ]
     )]
-    pub url: Option<String>,
+    pub url: Option<Regex>,
 
     #[structopt(
         short = "z",
