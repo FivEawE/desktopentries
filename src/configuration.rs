@@ -8,6 +8,16 @@ use structopt::StructOpt;
 )]
 pub struct Configuration {
     #[structopt(
+        short = "g",
+        long = "localized",
+        name = "Localized",
+        overrides_with = "Language"
+    )]
+    pub localized: bool,
+    #[structopt(short = "G", long = "language", name = "Language")]
+    pub lang: Option<String>,
+
+    #[structopt(
         short = "a",
         long = "application",
         name = "Application",
@@ -66,7 +76,7 @@ pub struct Configuration {
     #[structopt(short = "n", long = "name", name = "Name")]
     pub name: Option<Regex>,
 
-    #[structopt(short = "g", long = "generic-name", name = "GenericName")]
+    #[structopt(short = "N", long = "generic-name", name = "GenericName")]
     pub generic_name: Option<Regex>,
 
     #[structopt(

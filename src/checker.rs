@@ -1,5 +1,6 @@
 use regex::Regex;
 use std::collections::HashMap;
+use std::env;
 
 use super::configuration::Configuration;
 use super::entry::Entry;
@@ -9,11 +10,23 @@ static FALSE: &str = "false";
 
 pub struct Checker {
     checks: Vec<Box<dyn Check>>,
+    language_strings: Vec<String>,
 }
 
 impl Checker {
     pub fn new(conf: Configuration) -> Checker {
         let mut checks: Vec<Box<dyn Check>> = Vec::new();
+        let mut language_strings = Vec::with_capacity(0);
+
+        if conf.localized {
+            if let Some(lang) = env::var("LC_MESSAGES").ok() {
+                language_strings = prepare_language_strings(lang);
+            }
+        }
+
+        if let Some(lang) = conf.lang {
+            language_strings = prepare_language_strings(lang);
+        }
 
         if conf.application {
             checks.push(Box::new(ApplicationCheck {}));
@@ -36,11 +49,15 @@ impl Checker {
         }
 
         if let Some(regex) = conf.version {
-            checks.push(Box::new(VersionCheck { regex }))
+            checks.push(Box::new(VersionCheck { regex }));
         }
 
-        if let Some(regex) = conf.icon {
-            checks.push(Box::new(IconCheck { regex }))
+        if let Some(regex) = conf.name {
+            checks.push(Box::new(NameCheck::new(regex, &language_strings)));
+        }
+
+        if let Some(regex) = conf.generic_name {
+            checks.push(Box::new(GenericNameCheck::new(regex, &language_strings)));
         }
 
         if conf.no_display {
@@ -48,6 +65,14 @@ impl Checker {
         }
         if conf.not_no_display {
             checks.push(Box::new(NotNoDisplayCheck {}));
+        }
+
+        if let Some(regex) = conf.comment {
+            checks.push(Box::new(CommentCheck::new(regex, &language_strings)));
+        }
+
+        if let Some(regex) = conf.icon {
+            checks.push(Box::new(IconCheck { regex }))
         }
 
         if conf.hidden {
@@ -106,6 +131,10 @@ impl Checker {
             checks.push(Box::new(ImplementsCheck { regex_list }))
         }
 
+        if let Some(regex_list) = conf.keywords {
+            checks.push(Box::new(KeywordsCheck::new(regex_list, &language_strings)));
+        }
+
         if conf.startup_notify {
             checks.push(Box::new(StartupNotifyCheck {}));
         }
@@ -128,7 +157,10 @@ impl Checker {
             checks.push(Box::new(NotPrefersNonDefaultGPUCheck {}));
         }
 
-        Checker { checks }
+        Checker {
+            checks,
+            language_strings,
+        }
     }
 
     pub fn check_entry(&self, entry: &Entry) -> bool {
@@ -220,6 +252,44 @@ impl Check for VersionCheck {
     }
 }
 
+struct NameCheck {
+    regex: Regex,
+    localized_keys: Vec<String>,
+}
+impl NameCheck {
+    fn new(regex: Regex, language_strings: &Vec<String>) -> NameCheck {
+        let localized_keys = create_localized_keys("Name", language_strings);
+        NameCheck {
+            regex,
+            localized_keys,
+        }
+    }
+}
+impl Check for NameCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        check_localized_entry(&self.regex, &self.localized_keys, entries)
+    }
+}
+
+struct GenericNameCheck {
+    regex: Regex,
+    localized_keys: Vec<String>,
+}
+impl GenericNameCheck {
+    fn new(regex: Regex, language_strings: &Vec<String>) -> GenericNameCheck {
+        let localized_keys = create_localized_keys("GenericName", language_strings);
+        GenericNameCheck {
+            regex,
+            localized_keys,
+        }
+    }
+}
+impl Check for GenericNameCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        check_localized_entry(&self.regex, &self.localized_keys, entries)
+    }
+}
+
 struct NoDisplayCheck {}
 impl Check for NoDisplayCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
@@ -238,6 +308,25 @@ impl Check for NotNoDisplayCheck {
             Some(value) => value == FALSE,
             None => true,
         }
+    }
+}
+
+struct CommentCheck {
+    regex: Regex,
+    localized_keys: Vec<String>,
+}
+impl CommentCheck {
+    fn new(regex: Regex, language_strings: &Vec<String>) -> CommentCheck {
+        let localized_keys = create_localized_keys("Comment", language_strings);
+        CommentCheck {
+            regex,
+            localized_keys,
+        }
+    }
+}
+impl Check for CommentCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        check_localized_entry(&self.regex, &self.localized_keys, entries)
     }
 }
 
@@ -283,7 +372,7 @@ impl Check for OnlyShowInCheck {
         let entry = entries.get("OnlyShowIn");
         match entry {
             Some(value) => check_multi_string_entry(value, &self.regex_list),
-            None => true,
+            None => false,
         }
     }
 }
@@ -295,7 +384,7 @@ impl Check for NotShowInCheck {
         let entry = entries.get("NotShowIn");
         match entry {
             Some(value) => check_multi_string_entry(value, &self.regex_list),
-            None => true,
+            None => false,
         }
     }
 }
@@ -389,7 +478,7 @@ impl Check for ActionsCheck {
         let entry = entries.get("Actions");
         match entry {
             Some(value) => check_multi_string_entry(value, &self.regex_list),
-            None => true,
+            None => false,
         }
     }
 }
@@ -402,7 +491,7 @@ impl Check for MimeTypeCheck {
         let entry = entries.get("MimeType");
         match entry {
             Some(value) => check_multi_string_entry(value, &self.regex_list),
-            None => true,
+            None => false,
         }
     }
 }
@@ -428,8 +517,33 @@ impl Check for ImplementsCheck {
         let entry = entries.get("Implements");
         match entry {
             Some(value) => check_multi_string_entry(value, &self.regex_list),
-            None => true,
+            None => false,
         }
+    }
+}
+
+struct KeywordsCheck {
+    regex_list: Vec<Regex>,
+    localized_keys: Vec<String>,
+}
+impl KeywordsCheck {
+    fn new(regex_list: Vec<Regex>, language_strings: &Vec<String>) -> KeywordsCheck {
+        let localized_keys = create_localized_keys("Keywords", language_strings);
+        KeywordsCheck {
+            regex_list,
+            localized_keys,
+        }
+    }
+}
+impl Check for KeywordsCheck {
+    fn check(&self, entries: &HashMap<String, String>) -> bool {
+        for key in &self.localized_keys {
+            let entry = entries.get(key);
+            if let Some(value) = entry {
+                return check_multi_string_entry(value, &self.regex_list);
+            }
+        }
+        false
     }
 }
 
@@ -519,6 +633,54 @@ fn check_multi_string_entry(value: &String, regex_list: &Vec<Regex>) -> bool {
         }
     }
     count == regex_count
+}
+
+fn check_localized_entry(
+    regex: &Regex,
+    localized_keys: &Vec<String>,
+    entries: &HashMap<String, String>,
+) -> bool {
+    for key in localized_keys {
+        let entry = entries.get(key);
+        if let Some(value) = entry {
+            return regex.is_match(value);
+        }
+    }
+    false
+}
+
+fn prepare_language_strings(lang: String) -> Vec<String> {
+    let mut language_strings: Vec<String> = Vec::with_capacity(4);
+
+    let level1 = Regex::new(r"(.+)_([^.]+)(?:\..+)?@(.+)").unwrap();
+    let level2 = Regex::new(r"(.+)_([^.@]+)(?:[.@].+)?").unwrap();
+    let level3 = Regex::new(r"([^_]+)(?:_.+)?@(.+)").unwrap();
+    let level4 = Regex::new(r"(.+)[_.].+").unwrap();
+
+    if let Some(capture) = level1.captures(&lang) {
+        language_strings.push(format!("[{}_{}@{}]", &capture[1], &capture[2], &capture[3]));
+    }
+    if let Some(capture) = level2.captures(&lang) {
+        language_strings.push(format!("[{}_{}]", &capture[1], &capture[2]));
+    }
+    if let Some(capture) = level3.captures(&lang) {
+        language_strings.push(format!("[{}@{}]", &capture[1], &capture[2]));
+    }
+    if let Some(capture) = level4.captures(&lang) {
+        language_strings.push(format!("[{}]", &capture[1]));
+    }
+
+    language_strings
+}
+
+fn create_localized_keys(prefix: &str, language_strings: &Vec<String>) -> Vec<String> {
+    let mut localized_keys = Vec::with_capacity(language_strings.len() + 1);
+    for string in language_strings {
+        localized_keys.push(format!("{}{}", prefix, string));
+    }
+    localized_keys.push(String::from(prefix));
+
+    localized_keys
 }
 
 #[cfg(test)]
