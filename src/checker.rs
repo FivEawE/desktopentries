@@ -244,11 +244,7 @@ struct VersionCheck {
 }
 impl Check for VersionCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("Version");
-        match entry {
-            Some(value) => self.regex.is_match(value),
-            None => false,
-        }
+        check_string_entry("Version", &self.regex, entries)
     }
 }
 
@@ -293,21 +289,13 @@ impl Check for GenericNameCheck {
 struct NoDisplayCheck {}
 impl Check for NoDisplayCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("NoDisplay");
-        match entry {
-            Some(value) => value == TRUE,
-            None => false,
-        }
+        check_entry_true("NoDisplay", entries)
     }
 }
 struct NotNoDisplayCheck {}
 impl Check for NotNoDisplayCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("NoDisplay");
-        match entry {
-            Some(value) => value == FALSE,
-            None => true,
-        }
+        check_entry_false("NoDisplay", entries)
     }
 }
 
@@ -335,32 +323,20 @@ struct IconCheck {
 }
 impl Check for IconCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("Icon");
-        match entry {
-            Some(value) => self.regex.is_match(value),
-            None => false,
-        }
+        check_string_entry("Icon", &self.regex, entries)
     }
 }
 
 struct HiddenCheck {}
 impl Check for HiddenCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("Hidden");
-        match entry {
-            Some(value) => value == TRUE,
-            None => false,
-        }
+        check_entry_true("Hidden", entries)
     }
 }
 struct NotHiddenCheck {}
 impl Check for NotHiddenCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("Hidden");
-        match entry {
-            Some(value) => value == FALSE,
-            None => true,
-        }
+        check_entry_false("Hidden", entries)
     }
 }
 
@@ -369,11 +345,7 @@ struct OnlyShowInCheck {
 }
 impl Check for OnlyShowInCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("OnlyShowIn");
-        match entry {
-            Some(value) => check_multi_string_entry(value, &self.regex_list),
-            None => false,
-        }
+        check_multi_string_entry("OnlyShowIn", &self.regex_list, entries)
     }
 }
 struct NotShowInCheck {
@@ -381,32 +353,20 @@ struct NotShowInCheck {
 }
 impl Check for NotShowInCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("NotShowIn");
-        match entry {
-            Some(value) => check_multi_string_entry(value, &self.regex_list),
-            None => false,
-        }
+        check_multi_string_entry("NotShowIn", &self.regex_list, entries)
     }
 }
 
 struct DBusActivatableCheck {}
 impl Check for DBusActivatableCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("DBusActivatable");
-        match entry {
-            Some(value) => value == TRUE,
-            None => false,
-        }
+        check_entry_true("DBusActivatable", entries)
     }
 }
 struct NotDBusActivatableCheck {}
 impl Check for NotDBusActivatableCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("DBusActivatable");
-        match entry {
-            Some(value) => value == FALSE,
-            None => true,
-        }
+        check_entry_false("DBusActivatable", entries)
     }
 }
 
@@ -415,11 +375,7 @@ struct TryExecCheck {
 }
 impl Check for TryExecCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("TryExec");
-        match entry {
-            Some(value) => self.regex.is_match(value),
-            None => false,
-        }
+        check_string_entry("TryExec", &self.regex, entries)
     }
 }
 
@@ -428,11 +384,7 @@ struct ExecCheck {
 }
 impl Check for ExecCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("Exec");
-        match entry {
-            Some(value) => self.regex.is_match(value),
-            None => false,
-        }
+        check_string_entry("Exec", &self.regex, entries)
     }
 }
 
@@ -441,32 +393,20 @@ struct PathCheck {
 }
 impl Check for PathCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("Path");
-        match entry {
-            Some(value) => self.regex.is_match(value),
-            None => false,
-        }
+        check_string_entry("Path", &self.regex, entries)
     }
 }
 
 struct TerminalCheck {}
 impl Check for TerminalCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("Terminal");
-        match entry {
-            Some(value) => value == TRUE,
-            None => false,
-        }
+        check_entry_true("Terminal", entries)
     }
 }
 struct NotTerminalCheck {}
 impl Check for NotTerminalCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("Terminal");
-        match entry {
-            Some(value) => value == FALSE,
-            None => true,
-        }
+        check_entry_false("Terminal", entries)
     }
 }
 
@@ -475,11 +415,7 @@ struct ActionsCheck {
 }
 impl Check for ActionsCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("Actions");
-        match entry {
-            Some(value) => check_multi_string_entry(value, &self.regex_list),
-            None => false,
-        }
+        check_multi_string_entry("Actions", &self.regex_list, entries)
     }
 }
 
@@ -488,11 +424,7 @@ struct MimeTypeCheck {
 }
 impl Check for MimeTypeCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("MimeType");
-        match entry {
-            Some(value) => check_multi_string_entry(value, &self.regex_list),
-            None => false,
-        }
+        check_multi_string_entry("MimeType", &self.regex_list, entries)
     }
 }
 
@@ -501,11 +433,7 @@ struct CategoriesCheck {
 }
 impl Check for CategoriesCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("Categories");
-        match entry {
-            Some(value) => check_multi_string_entry(value, &self.regex_list),
-            None => true,
-        }
+        check_multi_string_entry("Categories", &self.regex_list, entries)
     }
 }
 
@@ -514,11 +442,7 @@ struct ImplementsCheck {
 }
 impl Check for ImplementsCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("Implements");
-        match entry {
-            Some(value) => check_multi_string_entry(value, &self.regex_list),
-            None => false,
-        }
+        check_multi_string_entry("Implements", &self.regex_list, entries)
     }
 }
 
@@ -538,9 +462,8 @@ impl KeywordsCheck {
 impl Check for KeywordsCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
         for key in &self.localized_keys {
-            let entry = entries.get(key);
-            if let Some(value) = entry {
-                return check_multi_string_entry(value, &self.regex_list);
+            if check_multi_string_entry(key, &self.regex_list, entries) {
+                return true;
             }
         }
         false
@@ -550,21 +473,13 @@ impl Check for KeywordsCheck {
 struct StartupNotifyCheck {}
 impl Check for StartupNotifyCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("StartupNotify");
-        match entry {
-            Some(value) => value == TRUE,
-            None => false,
-        }
+        check_entry_true("StartupNotify", entries)
     }
 }
 struct NotStartupNotifyCheck {}
 impl Check for NotStartupNotifyCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("StartupNotify");
-        match entry {
-            Some(value) => value == FALSE,
-            None => true,
-        }
+        check_entry_false("StartupNotify", entries)
     }
 }
 
@@ -573,11 +488,7 @@ struct StartupWMClassCheck {
 }
 impl Check for StartupWMClassCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("StartupWMClass");
-        match entry {
-            Some(value) => self.regex.is_match(value),
-            None => false,
-        }
+        check_string_entry("StartupWMClass", &self.regex, entries)
     }
 }
 
@@ -586,53 +497,75 @@ struct URLCheck {
 }
 impl Check for URLCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("URL");
-        match entry {
-            Some(value) => self.regex.is_match(value),
-            None => false,
-        }
+        check_string_entry("URL", &self.regex, entries)
     }
 }
 
 struct PrefersNonDefaultGPUCheck {}
 impl Check for PrefersNonDefaultGPUCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("PrefersNonDefaultGPU");
-        match entry {
-            Some(value) => value == TRUE,
-            None => false,
-        }
+        check_entry_true("PrefersNonDefaultGPU", entries)
     }
 }
 struct NotPrefersNonDefaultGPUCheck {}
 impl Check for NotPrefersNonDefaultGPUCheck {
     fn check(&self, entries: &HashMap<String, String>) -> bool {
-        let entry = entries.get("PrefersNonDefaultGPU");
-        match entry {
-            Some(value) => value == FALSE,
-            None => true,
-        }
+        check_entry_false("PrefersNonDefaultGPU", entries)
     }
 }
 
-fn check_multi_string_entry(value: &String, regex_list: &Vec<Regex>) -> bool {
-    let regex_count = regex_list.len();
-    let mut count = 0;
-    let values: Vec<&str> = value.split(';').collect();
-
-    for regex in regex_list {
-        if count == regex_count {
-            return true;
-        }
-
-        for &string in &values {
-            if regex.is_match(string) {
-                count += 1;
-                break;
-            }
-        }
+fn check_entry_true(key: &str, entries: &HashMap<String, String>) -> bool {
+    let entry = entries.get(key);
+    match entry {
+        Some(value) => value == TRUE,
+        None => false,
     }
-    count == regex_count
+}
+
+fn check_entry_false(key: &str, entries: &HashMap<String, String>) -> bool {
+    let entry = entries.get(key);
+    match entry {
+        Some(value) => value == FALSE,
+        None => true,
+    }
+}
+
+fn check_string_entry(key: &str, regex: &Regex, entries: &HashMap<String, String>) -> bool {
+    let entry = entries.get(key);
+    match entry {
+        Some(value) => regex.is_match(value),
+        None => false,
+    }
+}
+
+fn check_multi_string_entry(
+    key: &str,
+    regex_list: &Vec<Regex>,
+    entries: &HashMap<String, String>,
+) -> bool {
+    let entry = entries.get(key);
+    match entry {
+        Some(value) => {
+            let regex_count = regex_list.len();
+            let mut count = 0;
+            let values: Vec<&str> = value.split(';').collect();
+
+            for regex in regex_list {
+                if count == regex_count {
+                    return true;
+                }
+
+                for &string in &values {
+                    if regex.is_match(string) {
+                        count += 1;
+                        break;
+                    }
+                }
+            }
+            count == regex_count
+        }
+        None => false,
+    }
 }
 
 fn check_localized_entry(
