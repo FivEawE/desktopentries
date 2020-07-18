@@ -588,7 +588,7 @@ fn prepare_language_strings(lang: String) -> Vec<String> {
     let level1 = Regex::new(r"(.+)_([^.]+)(?:\..+)?@(.+)").unwrap();
     let level2 = Regex::new(r"(.+)_([^.@]+)(?:[.@].+)?").unwrap();
     let level3 = Regex::new(r"([^_]+)(?:_.+)?@(.+)").unwrap();
-    let level4 = Regex::new(r"(.+)[_.].+").unwrap();
+    let level4 = Regex::new(r"([^_@]+)(?:[_@].+)?").unwrap();
 
     if let Some(capture) = level1.captures(&lang) {
         language_strings.push(format!("[{}_{}@{}]", &capture[1], &capture[2], &capture[3]));
@@ -622,6 +622,7 @@ mod tests {
     use super::Configuration;
     use super::Entry;
     use std::collections::HashMap;
+    use std::env;
     use structopt::StructOpt;
 
     static APP_NAME: &str = "desktopentries";
@@ -698,10 +699,6 @@ mod tests {
         entries.insert(String::from("Categories"), String::from("Audio;Video;"));
         entries.insert(String::from("Implements"), String::from("something;"));
         entries.insert(
-            String::from("Keywords"),
-            String::from("foo;bar;entry;desktop;"),
-        );
-        entries.insert(
             String::from("StartupWMClass"),
             String::from("Just a notification"),
         );
@@ -733,13 +730,155 @@ mod tests {
             "deo",
             "-I",
             "thing",
-            "-k",
-            "desktop",
-            "entry",
             "-w",
             "(?i)NOTIFICATION",
         ]);
 
+        let checker = Checker::new(conf);
+        assert!(checker.check_entry(&entry));
+    }
+
+    #[test]
+    fn test_link() {
+        let mut entries = HashMap::new();
+        entries.insert(String::from("Type"), String::from("Link"));
+        entries.insert(String::from("URL"), String::from("https://fiveawe.com/"));
+
+        let entry = Entry::from_entries(entries);
+        let conf = Configuration::from_iter(&[APP_NAME, "-lAD", "-u", "https://fiveawe.com/"]);
+
+        let checker = Checker::new(conf);
+        assert!(checker.check_entry(&entry));
+    }
+
+    #[test]
+    fn test_localized() {
+        let mut entries = HashMap::new();
+        entries.insert(String::from("Name[en_GB@Latn]"), String::from("FooBar"));
+        entries.insert(String::from("GenericName[en_GB]"), String::from("Bar"));
+        entries.insert(String::from("Comment[en]"), String::from("Just a test"));
+
+        let entry = Entry::from_entries(entries);
+        let conf =
+            Configuration::from_iter(&[APP_NAME, "-g", "-n", "Foo", "-N", "Bar", "-c", "test"]);
+
+        env::set_var("LC_MESSAGES", "en_GB.ASCII@Latn");
+        let checker = Checker::new(conf);
+        assert!(checker.check_entry(&entry));
+    }
+
+    #[test]
+    fn test_localized2() {
+        let mut entries = HashMap::new();
+        entries.insert(String::from("Name[en@Latn]"), String::from("FooBar"));
+        entries.insert(String::from("GenericName[en]"), String::from("Bar"));
+        entries.insert(String::from("Comment"), String::from("Just a test"));
+
+        let entry = Entry::from_entries(entries);
+        let conf = Configuration::from_iter(&[
+            APP_NAME, "-n", "Foo", "-N", "Bar", "-c", "test", "-G", "en@Latn",
+        ]);
+
+        let checker = Checker::new(conf);
+        assert!(checker.check_entry(&entry));
+    }
+
+    #[test]
+    fn test_localized_priority() {
+        let mut entries = HashMap::new();
+        entries.insert(String::from("Keywords[en_GB]"), String::from("Foo;Bar;"));
+        entries.insert(
+            String::from("Keywords[en@Latn]"),
+            String::from("Three;Two;"),
+        );
+
+        let entry = Entry::from_entries(entries);
+        let conf = Configuration::from_iter(&[APP_NAME, "-g", "-k", "Foo", "Bar"]);
+
+        env::set_var("LC_MESSAGES", "en_GB.ASCII@Latn");
+        let checker = Checker::new(conf);
+        assert!(checker.check_entry(&entry));
+    }
+
+    #[test]
+    fn test_mix() {
+        let mut entries = HashMap::new();
+        entries.insert(String::from("Version"), String::from("1.0.0"));
+        entries.insert(String::from("Icon"), String::from("fOoBaR1"));
+        entries.insert(
+            String::from("OnlyShowIn"),
+            String::from("one;two;three;one;"),
+        );
+        entries.insert(String::from("NotShowIn"), String::from("four;five;six;"));
+        entries.insert(String::from("TryExec"), String::from("foo"));
+        entries.insert(String::from("Exec"), String::from("bar"));
+        entries.insert(String::from("Path"), String::from("/foo/bar/abc/def"));
+        entries.insert(
+            String::from("Actions"),
+            String::from("New Window;Hidden Window;"),
+        );
+        entries.insert(
+            String::from("MimeType"),
+            String::from("image/png;image/jpg;"),
+        );
+        entries.insert(String::from("Categories"), String::from("Audio;Video;"));
+        entries.insert(String::from("Implements"), String::from("something;"));
+        entries.insert(
+            String::from("Keywords"),
+            String::from("foo;bar;entry;desktop;"),
+        );
+        entries.insert(
+            String::from("StartupWMClass"),
+            String::from("Just a notification"),
+        );
+        entries.insert(String::from("Keywords[en_GB]"), String::from("Foo;Bar;"));
+        entries.insert(
+            String::from("Keywords[en@Latn]"),
+            String::from("Three;Two;"),
+        );
+        entries.insert(String::from("Type"), String::from("Application"));
+        entries.insert(String::from("NoDisplay"), String::from("true"));
+        entries.insert(String::from("Hidden"), String::from("true"));
+        entries.insert(String::from("DBusActivatable"), String::from("true"));
+        entries.insert(String::from("Terminal"), String::from("false"));
+        entries.insert(String::from("StartupNotify"), String::from("false"));
+
+        let entry = Entry::from_entries(entries);
+        let conf = Configuration::from_iter(&[
+            APP_NAME,
+            "-v",
+            "1",
+            "-i",
+            "(?i)bar\\d",
+            "-o",
+            "three",
+            "one",
+            "-O",
+            "five",
+            "-X",
+            "o",
+            "-x",
+            "[^foo]",
+            "-p",
+            "/abc/",
+            "-e",
+            "Window",
+            "-m",
+            "(?i)image",
+            "-C",
+            "dio",
+            "deo",
+            "-I",
+            "thing",
+            "-w",
+            "(?i)NOTIFICATION",
+            "-aLDyhbTSZg",
+            "-k",
+            "Foo",
+            "Bar",
+        ]);
+
+        env::set_var("LC_MESSAGES", "en_GB.ASCII@Latn");
         let checker = Checker::new(conf);
         assert!(checker.check_entry(&entry));
     }
