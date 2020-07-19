@@ -10,7 +10,6 @@ static FALSE: &str = "false";
 
 pub struct Checker {
     checks: Vec<Box<dyn Check>>,
-    language_strings: Vec<String>,
 }
 
 impl Checker {
@@ -157,10 +156,7 @@ impl Checker {
             checks.push(Box::new(NotPrefersNonDefaultGPUCheck {}));
         }
 
-        Checker {
-            checks,
-            language_strings,
-        }
+        Checker { checks }
     }
 
     pub fn check_entry(&self, entry: &Entry) -> bool {
