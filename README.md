@@ -8,6 +8,13 @@ A simple tool for displaying and querying desktop entries
 * Supports localized keys (f.e. Name, Comment, etc.)
 * Supports RegEx
 
+## Installation
+
+You can install the tool via `cargo`:
+```
+cargo install desktopentries
+```
+
 ## Usage
 
 To display all desktop entries, run `desktopentries` with no arguments:
@@ -30,3 +37,23 @@ To list all possible flags and options, run `desktopentries` with the `help` opt
 ```
 desktopentries --help
 ```
+
+## Notes
+
+This tool tries to follow the Desktop Entry Specification. It looks for the entries in directories specified by
+`$XDG_DATA_DIRS` environment variable. If the variable is not present, the tool looks for the entries in
+`/usr/share/applications/` directory.
+
+The output of this tool consists of the paths to the desktop entry files with their contents which match the specified
+flags and options. To extract particular lines from the output, you can use a tool such as `grep` and pipe the output of
+this tool to it.
+
+You can combine multiple flags and options, however, some of them are mutually exclusive as specified in the
+specification (f.e. you cannot query for an entry which is of `Type` `Application` and contains an URL attribute).
+
+All options take RegEx as values, so you can use them to query the entries as well. The tool uses The Rust Project
+Developers's `regex` crate under the hood, so it does not support Lookarounds (Lookahead, Lookbehind).
+
+The tool also supports localized attributes as well. When the `-g` flag is provided, the tool looks for the value of
+`$LC_MESSAGES` environment variable and uses it for searching. You can specify a different language using the `-G`
+option, however, it does not check whether the value specified is a correct locale code.
