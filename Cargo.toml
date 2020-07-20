@@ -8,7 +8,7 @@ description = "A simple tool for displaying and querying desktop entries"
 readme = "README.md"
 homepage = "https://github.com/FivEawE/desktopentries"
 repository = "https://github.com/FivEawE/desktopentries"
-keywords = ["cli", "search", "query", "desktop", "entry", "entries"]
+keywords = ["cli", "query", "desktop", "entry", "entries"]
 categories = ["command-line-utilities"]
 
 [dependencies]
