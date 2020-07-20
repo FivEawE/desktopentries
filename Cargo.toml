@@ -3,8 +3,13 @@ name = "desktopentries"
 version = "0.1.0"
 authors = ["FivEawE <fiveawe@gmail.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT"
+description = "A simple tool for displaying and querying desktop entries"
+readme = "README.md"
+homepage = "https://github.com/FivEawE/desktopentries"
+repository = "https://github.com/FivEawE/desktopentries"
+keywords = ["cli", "search", "query", "desktop", "entry", "entries"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 structopt = "0"

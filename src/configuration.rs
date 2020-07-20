@@ -4,7 +4,7 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 #[structopt(
     name = "desktopentries",
-    about = "An easy tool for displaying and querying desktop entries",
+    about = "A simple tool for displaying and querying desktop entries",
     after_help = "This tool tries to follow the Desktop Entry Specification. It looks for the \
     entries in directories specified by $XDG_DATA_DIRS environment variable. If the variable is \
     not present, the tool looks for the entries in /usr/share/applications/ directory.\n\n\
