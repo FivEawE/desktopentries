@@ -8,16 +8,20 @@ use structopt::StructOpt;
     after_help = "This tool tries to follow the Desktop Entry Specification. It looks for the \
     entries in directories specified by $XDG_DATA_DIRS environment variable. If the variable is \
     not present, the tool looks for the entries in /usr/share/applications/ directory.\n\n\
+    If multiple entry files with the same ID exist, the one located in the first entry directory \
+    will be chosen. If the files exist in the same entry directory, the one which was detected \
+    first by Rust's std::fs::read_dir() will be used (default behaviour is undefined by the \
+    specification).\n\n\
     The output of this tool consists of the paths to the desktop entry files with their contents \
     which match the specified flags and options. To extract particular lines from the output, you \
     can use a tool such as grep and pipe the output of this tool to it.\n\n\
     You can combine multiple flags and options, however, some of them are mutually exclusive as \
     specified in the specification (f.e. you cannot query for an entry which is of Type \
-    Application and contains an URL attribute).\n\n\
+    Application and contains a URL key).\n\n\
     All options take RegEx as values, so you can use them to query the entries as well. The tool \
     uses The Rust Project Developers's regex crate under the hood, so it does not support \
     Lookarounds (Lookahead, Lookbehind).\n\n\
-    The tool also supports localized attributes as well. When the -g flag is provided, the tool \
+    The tool also supports localized keys as well. When the -g flag is provided, the tool \
     looks for the value of $LC_MESSAGES environment variable and uses it for searching. You can \
     specify a different language using the -G option, however, it does not check whether the value \
     specified is a correct locale code."
