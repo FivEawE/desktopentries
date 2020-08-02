@@ -53,7 +53,7 @@ flags and options. To extract particular lines from the output, you can use a to
 this tool to it.
 
 You can combine multiple flags and options, however, some of them are mutually exclusive as specified in the
-specification (f.e. you cannot query for an entry which is of `Type` `Application` and contains a URL key).
+specification (f.e. you cannot query for an entry which is of `Type` `Application` and contains a `URL` key).
 
 All options take RegEx as values, so you can use them to query the entries as well. The tool uses The Rust Project
 Developers's `regex` crate under the hood, so it does not support Lookarounds (Lookahead, Lookbehind).

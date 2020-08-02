@@ -52,18 +52,18 @@ fn main() {
                             match out {
                                 Ok(_) => {
                                     let out = writeln!(out_handle, "{}", contents);
-                                    if let Err(error) = out {
-                                        eprintln!("{}", error);
+                                    if let Err(_) = out {
+                                        eprintln!("Error while outputting to stdout");
                                     }
                                 }
-                                Err(error) => eprintln!("{}", error),
+                                Err(_) => eprintln!("Error while outputting to stdout"),
                             }
                         }
                     }
-                    Err(error) => eprintln!("{}", error),
+                    Err(error) => eprintln!("{} in {}", error, entry_path.display()),
                 }
             }
-            Err(error) => eprintln!("{}", error),
+            Err(_) => eprintln!("Could not read file {}", entry_path.display()),
         }
     }
 }
@@ -93,13 +93,15 @@ fn get_entries_from_path(base_path: &String, path: &Path, entries: &mut HashMap<
                                     }
                                 }
                             }
-                            Err(error) => eprintln!("{}", error),
+                            Err(_) => eprintln!("Could not get file type of {}", file.path()
+                                .display()),
                         }
                     }
-                    Err(error) => eprintln!("{}", error),
+                    Err(_) => eprintln!("There was an error while iterating over folder contents \
+                    of {}", path.display()),
                 }
             }
         }
-        Err(error) => eprintln!("{}", error),
+        Err(_) => eprintln!("Could not read path {}", path.display()),
     }
 }
